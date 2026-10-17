@@ -488,3 +488,7 @@ graphify-out/
 # Local editor / agent settings
 .vscode/
 .kiro/
+
+
+# Project docs / spec (local only)
+docs/
