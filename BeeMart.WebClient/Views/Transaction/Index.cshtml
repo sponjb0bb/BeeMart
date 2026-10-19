@@ -10,49 +10,42 @@
 
 @await Html.PartialAsync("_PosHeader")
 
-<div class="content">
-    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
-    {
-        <div class="alert alert-success">@Model.SuccessMessage</div>
-    }
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="alert alert-error">@Model.ErrorMessage</div>
-    }
+<div class="card-shell">
+    <nav class="tabs">
+        <a asp-controller="Transaction" asp-action="Index" class="active">New Transaction</a>
+        <a asp-controller="History" asp-action="Index">History Transaction</a>
+    </nav>
+    <div style="padding:1.5rem; margin-bottom:1rem; border:1px solid var(--gray-light); border-radius:0.5rem;">
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success">@Model.SuccessMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
 
-    <div class="panel">
-        <div class="form-group">
-            <label>Invoice No</label>
-            <input class="form-control read-only" value="@Model.InvoiceNo" readonly />
-        </div>
+        <div class="invoice-bar">Invoice No: @Model.InvoiceNo</div>
 
-        <form asp-action="Search" method="post" class="row-flex">
+        <form asp-action="Search" method="post">
             @Html.AntiForgeryToken()
-            <div class="form-group" style="flex:1; margin-bottom:0;">
-                <label>Cari Barang (Ketik: Apel / Susu, lalu tekan Enter)</label>
-                <input name="keyword" class="form-control" placeholder="Ketik nama barang..."
-                       value="@Model.SearchKeyword" autofocus />
-            </div>
-            <button type="submit" class="btn btn-blue">Cari</button>
+            <div class="search-label">Cari Barang (Ketik: Apel / Susu, lalu tekan Enter)</div>
+            <input name="keyword" class="form-control" placeholder="Ketik nama barang..."
+                   value="@Model.SearchKeyword" autofocus />
         </form>
-    </div>
 
-    @if (Model.SearchResults.Any())
-    {
-        <div class="panel">
-            <h2>Hasil Pencarian</h2>
+        @if (Model.SearchResults.Any())
+        {
             <table class="data">
                 <thead>
-                    <tr>
-                        <th>Nama Barang</th><th>Berat</th><th>Stock</th><th>Harga</th><th>Diskon</th><th>Aksi</th>
-                    </tr>
+                    <tr><th>Nama Barang</th><th>Berat</th><th>Stock</th><th>Harga</th><th>Diskon</th><th>Aksi</th></tr>
                 </thead>
                 <tbody>
                 @foreach (var p in Model.SearchResults)
                 {
                     <tr>
                         <td>@p.Name</td>
-                        <td>@p.Weight</td>
+                        <td>@p.Weight Kg</td>
                         <td>@p.Stock</td>
                         <td>@Rp(p.Price)</td>
                         <td>@p.Discount%</td>
@@ -68,34 +61,32 @@
                 }
                 </tbody>
             </table>
-        </div>
-    }
+        }
 
-    @if (Model.SelectedProduct is { } sp)
-    {
-        <div class="panel">
-            <h2>Barang Terpilih: @sp.Name</h2>
-            <form asp-action="AddToCart" method="post" class="row-flex">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="idProduct" value="@sp.IdProduct" />
-                <input type="hidden" name="name" value="@sp.Name" />
-                <input type="hidden" name="price" value="@sp.Price.ToString(CultureInfo.InvariantCulture)" />
-                <input type="hidden" name="discount" value="@sp.Discount.ToString(CultureInfo.InvariantCulture)" />
-                <input type="hidden" name="stock" value="@sp.Stock" />
-                <input type="hidden" name="keyword" value="@Model.SearchKeyword" />
-                <div><label>Harga Satuan</label><div>@Rp(sp.Price)</div></div>
-                <div><label>Sisa Stock</label><div>@sp.Stock</div></div>
-                <div class="form-group" style="margin-bottom:0;">
-                    <label>Qty</label>
-                    <input name="qty" type="number" min="1" max="@sp.Stock" value="1" class="form-control" style="width:100px;" />
-                </div>
-                <button type="submit" class="btn btn-blue">Masukkan ke Keranjang</button>
-            </form>
-        </div>
-    }
+        @if (Model.SelectedProduct is { } sp)
+        {
+            <div class="selected-panel">
+                <h3>Barang Terpilih: @sp.Name</h3>
+                <form asp-action="AddToCart" method="post" class="row-flex">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="idProduct" value="@sp.IdProduct" />
+                    <input type="hidden" name="name" value="@sp.Name" />
+                    <input type="hidden" name="price" value="@sp.Price.ToString(CultureInfo.InvariantCulture)" />
+                    <input type="hidden" name="discount" value="@sp.Discount.ToString(CultureInfo.InvariantCulture)" />
+                    <input type="hidden" name="stock" value="@sp.Stock" />
+                    <input type="hidden" name="keyword" value="@Model.SearchKeyword" />
+                    <div><strong>Harga Satuan:</strong><br />@Rp(sp.Price)</div>
+                    <div><strong>Sisa Stock:</strong><br />@sp.Stock</div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Qty</label>
+                        <input name="qty" type="number" min="1" max="@sp.Stock" value="1" class="form-control" style="width:90px;" />
+                    </div>
+                    <button type="submit" class="btn btn-blue">Masukkan ke Keranjang</button>
+                </form>
+            </div>
+        }
 
-    <div class="panel">
-        <h2>Daftar Belanjaan</h2>
+        <div class="section-title">Daftar Belanjaan</div>
         <table class="data">
             <thead>
                 <tr><th>Nama Barang</th><th>Harga</th><th>Diskon</th><th>Qty</th><th>Subtotal</th><th>Aksi</th></tr>
@@ -128,20 +119,20 @@
             </tbody>
         </table>
 
-        <p class="total" style="margin-top:1rem;">Total: @Rp(Model.Total)</p>
+        <div class="total">Total: @Rp(Model.Total)</div>
 
-        <form asp-action="Submit" method="post" class="row-flex">
+        <form asp-action="Submit" method="post">
             @Html.AntiForgeryToken()
-            <div class="form-group" style="margin-bottom:0;">
-                <label>Metode Pembayaran</label>
-                <select name="idPaymentMethod" class="form-control">
+            <div class="row-flex" style="justify-content:flex-end; margin-bottom:1rem;">
+                <label style="font-weight:700;">Metode Pembayaran:</label>
+                <select name="idPaymentMethod" class="form-control" style="width:200px;">
                     @foreach (var pm in Model.PaymentMethods)
                     {
                         <option value="@pm.IdPaymentMethod">@pm.MethodName</option>
                     }
                 </select>
             </div>
-            <button type="submit" class="btn btn-blue" @(Model.Cart.Any() ? "" : "disabled")>Submit Transaksi</button>
+            <button type="submit" class="btn btn-blue btn-block" @(Model.Cart.Any() ? "" : "disabled")>Submit Transaksi</button>
         </form>
     </div>
 </div>

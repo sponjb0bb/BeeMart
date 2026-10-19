@@ -13,37 +13,35 @@
 
 @await Html.PartialAsync("_PosHeader")
 
-<div class="content">
-    <div class="panel">
-        <h2>
-            @if (isAdmin)
-            {
-                <text>Pencarian Data Transaksi (Semua Kasir)</text>
-            }
-            else
-            {
-                <text>Pencarian Data Transaksi (Hanya Kasir: @Model.Username)</text>
-            }
-        </h2>
+<div class="card-shell">
+    <nav class="tabs">
+        <a asp-controller="Transaction" asp-action="Index">New Transaction</a>
+        <a asp-controller="History" asp-action="Index" class="active">History Transaction</a>
+    </nav>
+    <div style="padding:1.5rem;">
+        <p class="search-label" style="font-style:italic;">
+            Pencarian Data Transaksi
+            <strong style="color:var(--blue-text); font-style:normal;">
+                @(isAdmin ? "(Semua Kasir)" : $"(Hanya Kasir: {Model.Username})")
+            </strong>
+        </p>
 
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
             <div class="alert alert-error">@Model.ErrorMessage</div>
         }
 
-        <form asp-action="Index" method="get" class="row-flex">
+        <form asp-action="Index" method="get" class="row-flex" style="margin-bottom:1.25rem;">
             <div class="form-group" style="margin-bottom:0;">
-                <label>Pilih Tanggal</label>
-                <input type="date" name="date" class="form-control"
+                <label>Pilih Tanggal:</label>
+                <input type="date" name="date" class="form-control" style="width:220px;"
                        value="@(Model.Date?.ToString("yyyy-MM-dd"))" required />
             </div>
             <button type="submit" class="btn btn-blue">Cari Data</button>
         </form>
-    </div>
 
-    @if (Model.Searched)
-    {
-        <div class="panel">
+        @if (Model.Searched)
+        {
             <table class="data">
                 <thead>
                     <tr>
@@ -89,6 +87,6 @@
                     }
                 </div>
             }
-        </div>
-    }
+        }
+    </div>
 </div>

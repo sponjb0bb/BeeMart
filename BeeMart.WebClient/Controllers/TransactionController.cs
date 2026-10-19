@@ -79,11 +79,15 @@ public class TransactionController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddToCart(string idProduct, string name, decimal price, decimal discount, int stock, int qty, string keyword)
+    public async Task<IActionResult> AddToCart(string idProduct, string name, string price, string discount, int stock, int qty, string keyword)
     {
         if (RequireLogin() is { } r) return r;
 
         var vm = await BuildViewModelAsync();
+        // Parse invariantly — the hidden fields are written with InvariantCulture ('.' decimal).
+        // Binding them as decimal would use request culture (id-ID treats '.' as thousands sep -> x100 bug).
+        var priceVal = decimal.Parse(price, System.Globalization.CultureInfo.InvariantCulture);
+        var discountVal = decimal.Parse(discount, System.Globalization.CultureInfo.InvariantCulture);
         vm.SearchKeyword = keyword;
 
         if (qty < 1)
@@ -108,7 +112,7 @@ public class TransactionController : Controller
             }
             else
             {
-                cart.Add(new CartItem { IdProduct = idProduct, Name = name, Price = price, Discount = discount, Qty = qty });
+                cart.Add(new CartItem { IdProduct = idProduct, Name = name, Price = priceVal, Discount = discountVal, Qty = qty });
             }
 
             if (vm.ErrorMessage is null)

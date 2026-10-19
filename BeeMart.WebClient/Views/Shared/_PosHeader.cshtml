@@ -2,18 +2,22 @@
     var username = Context.Session.GetString("auth.username") ?? "";
     var role = Context.Session.GetString("auth.role") ?? "";
     var active = ViewData["ActiveTab"] as string ?? "new";
+    var roleLabel = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "Cashier";
 }
 <div class="topbar">
     <span class="brand">BeeMart</span>
     <div class="session-info">
-        <span>@DateTime.Now.ToString("d/M/yyyy, HH.mm.ss") | Role: @role | Login: @username</span>
+        @if (active == "history")
+        {
+            <span>Role: <span class="role">@roleLabel</span> | Login: @username</span>
+        }
+        else
+        {
+            <span>@DateTime.Now.ToString("d/M/yyyy, HH.mm.ss") | Kasir: @username</span>
+        }
         <form asp-controller="Auth" asp-action="Logout" method="post" class="inline-form">
             @Html.AntiForgeryToken()
             <button type="submit" class="btn btn-red btn-sm">Logout</button>
         </form>
     </div>
 </div>
-<nav class="tabs">
-    <a asp-controller="Transaction" asp-action="Index" class="@(active == "new" ? "active" : "")">New Transaction</a>
-    <a asp-controller="History" asp-action="Index" class="@(active == "history" ? "active" : "")">History Transaction</a>
-</nav>
