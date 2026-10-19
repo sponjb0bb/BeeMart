@@ -1,0 +1,94 @@
+@using System.Globalization
+@model BeeMart.WebClient.Models.Transactions.HistoryViewModel
+@{
+    ViewData["Title"] = "History Transaction";
+    ViewData["ActiveTab"] = "history";
+    Layout = "_Layout";
+    var idr = CultureInfo.GetCultureInfo("id-ID");
+    string Rp(decimal v) => "Rp " + v.ToString("#,##0", idr);
+    var isAdmin = string.Equals(Model.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+    var r = Model.Result;
+    var totalPages = r is null || r.PageSize == 0 ? 0 : (int)Math.Ceiling(r.TotalCount / (double)r.PageSize);
+}
+
+@await Html.PartialAsync("_PosHeader")
+
+<div class="content">
+    <div class="panel">
+        <h2>
+            @if (isAdmin)
+            {
+                <text>Pencarian Data Transaksi (Semua Kasir)</text>
+            }
+            else
+            {
+                <text>Pencarian Data Transaksi (Hanya Kasir: @Model.Username)</text>
+            }
+        </h2>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <form asp-action="Index" method="get" class="row-flex">
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Pilih Tanggal</label>
+                <input type="date" name="date" class="form-control"
+                       value="@(Model.Date?.ToString("yyyy-MM-dd"))" required />
+            </div>
+            <button type="submit" class="btn btn-blue">Cari Data</button>
+        </form>
+    </div>
+
+    @if (Model.Searched)
+    {
+        <div class="panel">
+            <table class="data">
+                <thead>
+                    <tr>
+                        <th>No. Transaksi</th><th>Tanggal &amp; Jam</th><th>Kasir</th>
+                        <th>Jml Item</th><th>Pembayaran</th><th>Total Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (r is null || !r.Items.Any())
+                {
+                    <tr class="empty-row"><td colspan="6">Tidak ada transaksi pada tanggal ini.</td></tr>
+                }
+                else
+                {
+                    @foreach (var t in r.Items)
+                    {
+                        <tr>
+                            <td>@t.InvoiceNo</td>
+                            <td>@t.TransactionDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@t.Cashier</td>
+                            <td>@t.ItemCount</td>
+                            <td>@t.PaymentMethod</td>
+                            <td>@Rp(t.TotalPrice)</td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+
+            @if (totalPages > 1)
+            {
+                <div class="pagination">
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == Model.Page)
+                        {
+                            <span class="current">@i</span>
+                        }
+                        else
+                        {
+                            <a asp-action="Index" asp-route-date="@Model.Date?.ToString("yyyy-MM-dd")" asp-route-page="@i">@i</a>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

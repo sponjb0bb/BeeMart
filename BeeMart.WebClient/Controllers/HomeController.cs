@@ -15,7 +15,10 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        return View();
+        // Entry point: go to the POS if logged in, otherwise to login.
+        return HttpContext.Session.GetString("auth.token") is { Length: > 0 }
+            ? RedirectToAction("Index", "Transaction")
+            : RedirectToAction("Login", "Auth");
     }
 
     public IActionResult Privacy()
